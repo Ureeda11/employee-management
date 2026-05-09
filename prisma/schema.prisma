@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     @unique
+  description String?
+  employees   Employee[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Role {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     @unique
+  description String?
+  employees   Employee[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Employee {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId   String      @unique
+  firstName    String
+  lastName     String
+  email        String      @unique
+  phone        String?
+  address      String?
+  dateOfBirth  DateTime?
+  joinDate     DateTime    @default(now())
+  status       String      @default("active")
+  departmentId String      @db.ObjectId
+  roleId       String      @db.ObjectId
+  department   Department  @relation(fields: [departmentId], references: [id])
+  role         Role        @relation(fields: [roleId], references: [id])
+  salary       Salary?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Salary {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId    String   @unique @db.ObjectId
+  employee      Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  basic         Float
+  allowances    Float    @default(0)
+  deductions    Float    @default(0)
+  currency      String   @default("USD")
+  effectiveDate DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
