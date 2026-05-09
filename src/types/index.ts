@@ -8,7 +8,7 @@ export interface Admin {
 }
 
 export interface Department {
-  id: number
+  id: string
   name: string
   description?: string
   _count?: { employees: number }
@@ -16,7 +16,7 @@ export interface Department {
 }
 
 export interface Role {
-  id: number
+  id: string
   name: string
   description?: string
   _count?: { employees: number }
@@ -24,7 +24,7 @@ export interface Role {
 }
 
 export interface Salary {
-  id: number
+  id: string
   basic: number
   allowances: number
   deductions: number
@@ -33,7 +33,7 @@ export interface Salary {
 }
 
 export interface Employee {
-  id: number
+  id: string
   employeeId: string
   firstName: string
   lastName: string
@@ -43,8 +43,8 @@ export interface Employee {
   dateOfBirth?: string
   joinDate: string
   status: 'active' | 'inactive' | 'on_leave'
-  departmentId: number
-  roleId: number
+  departmentId: string
+  roleId: string
   department: Department
   role: Role
   salary?: Salary
