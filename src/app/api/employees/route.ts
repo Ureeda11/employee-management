@@ -38,7 +38,11 @@ export async function GET(req: NextRequest) {
     ])
 
     // Password hide karo
-    const safeEmployees = employees.map(({ password: _pwd, ...emp }) => emp)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const safeEmployees = (employees as any[]).map((emp) => {
+      const { password: _pwd, ...safe } = emp
+      return safe
+    })
 
     return NextResponse.json({
       employees: safeEmployees,
