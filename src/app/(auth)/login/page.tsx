@@ -132,7 +132,7 @@ export default function LoginPage() {
 
             <div className="mt-6 p-3 rounded-lg bg-slate-50 border border-slate-200">
               <p className="text-xs text-slate-500 text-center">
-                Demo: <span className="font-medium text-slate-700">admin@company.com</span> / <span className="font-medium text-slate-700">admin123</span>
+                Demo: <span className="font-medium text-slate-700">ureeda@company.com</span> / <span className="font-medium text-slate-700">ureeda123</span>
               </p>
             </div>
           </div>
