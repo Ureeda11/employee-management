@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthUser } from '@/lib/auth'
+import bcrypt from 'bcryptjs'
 
 export async function GET(req: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
         { employeeId: { contains: search, mode: 'insensitive' } },
       ]
     }
-    if (departmentId) where.departmentId = departmentId  
+    if (departmentId) where.departmentId = departmentId
     if (status)       where.status = status
 
     const [employees, total] = await Promise.all([
@@ -36,8 +37,11 @@ export async function GET(req: NextRequest) {
       prisma.employee.count({ where }),
     ])
 
+    // Password hide karo
+    const safeEmployees = employees.map(({ password: _pwd, ...emp }) => emp)
+
     return NextResponse.json({
-      employees,
+      employees: safeEmployees,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     })
   } catch (err) {
@@ -55,14 +59,27 @@ export async function POST(req: NextRequest) {
     const {
       firstName, lastName, email, phone, address,
       dateOfBirth, joinDate, status, departmentId, roleId,
-      basicSalary, allowances, deductions,
+      basicSalary, allowances, deductions, password,
     } = body
 
     if (!firstName || !lastName || !email || !departmentId || !roleId)
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
 
-    const count = await prisma.employee.count()
-    const employeeId = `EMP${String(count + 1).padStart(3, '0')}`
+    // Check if email exists
+    const existing = await prisma.employee.findUnique({ where: { email } })
+    if (existing)
+      return NextResponse.json({ error: 'Email already exists' }, { status: 409 })
+
+    // Safe unique employeeId generate karo
+    let employeeId = ''
+    let isUnique = false
+    while (!isUnique) {
+      const random = Math.floor(Math.random() * 9000) + 1000
+      employeeId = `EMP${random}`
+      const existing = await prisma.employee.findUnique({ where: { employeeId } })
+      if (!existing) isUnique = true
+    }
+    const hashedPassword = password ? await bcrypt.hash(password, 12) : null
 
     const employee = await prisma.employee.create({
       data: {
@@ -73,8 +90,9 @@ export async function POST(req: NextRequest) {
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         joinDate:    joinDate    ? new Date(joinDate)    : new Date(),
         status:      status      ?? 'active',
-        departmentId,   
+        departmentId,
         roleId,
+        password:    hashedPassword,
         salary: {
           create: {
             basic:      parseFloat(basicSalary) || 0,
@@ -86,9 +104,10 @@ export async function POST(req: NextRequest) {
       include: { department: true, role: true, salary: true },
     })
 
-    return NextResponse.json({ employee }, { status: 201 })
+    const { password: _, ...safeEmployee } = employee
+    return NextResponse.json({ employee: safeEmployee }, { status: 201 })
   } catch (err: any) {
-    console.error(err)
+    console.error('POST /api/employees error:', err)
     if (err.code === 'P2002')
       return NextResponse.json({ error: 'Email already exists' }, { status: 409 })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -51,6 +51,7 @@ model Employee {
   department   Department  @relation(fields: [departmentId], references: [id])
   role         Role        @relation(fields: [roleId], references: [id])
   salary       Salary?
+  password     String?     // ← YE ADD KARO
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }

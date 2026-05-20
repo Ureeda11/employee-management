@@ -1,4 +1,5 @@
 'use client'
+// src/components/employees/EmployeeForm.tsx
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -29,6 +30,7 @@ export default function EmployeeForm({ employee, departments, roles, onSaved, on
     basicSalary:  employee?.salary?.basic       ? String(employee.salary.basic)       : '',
     allowances:   employee?.salary?.allowances  ? String(employee.salary.allowances)  : '0',
     deductions:   employee?.salary?.deductions  ? String(employee.salary.deductions)  : '0',
+    password:     '',
   })
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -114,6 +116,13 @@ export default function EmployeeForm({ employee, departments, roles, onSaved, on
             </select>
           </div>
           <Input label="Join Date" value={form.joinDate} onChange={set('joinDate')} type="date" />
+          <Input
+            label={employee ? 'New Password (leave blank to keep)' : 'Password *'}
+            value={form.password}
+            onChange={set('password')}
+            type="password"
+            placeholder="••••••••"
+          />
         </div>
       </div>
 
